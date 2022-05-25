@@ -103,6 +103,9 @@
 #define ENABLE_RGB_MATRIX_PIXEL_FLOW
 #define ENABLE_RGB_MATRIX_PIXEL_RAIN
 
+// default is {112, 32}  since the led matrix is 224 x 64
+#define RGB_MATRIX_CENTER {112, 32}
+
 #endif
 
 /* Debounce reduces chatter (unintended double-presses) - set 0 if debouncing is not needed */
