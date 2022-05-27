@@ -18,6 +18,80 @@ qmk doctor
 
 make janjan/makropad:default:flash
 
+## qmk internals for rgb
+
+main loop in `quantum/main.c`:
+
+```
+void protocol_task(void) {
+    protocol_pre_task();
+
+    keyboard_task(); // <- important
+
+    protocol_post_task();
+}
+
+int main(void) {
+    platform_setup();
+    protocol_setup();
+    keyboard_setup();
+
+    protocol_init();
+
+    while (true) {
+        protocol_task();
+    }
+}
+
+```
+
+in `quantum/keyboard.c`
+
+```
+void keyboard_task(void) {
+    bool matrix_changed = matrix_scan_task();
+    (void)matrix_changed;
+
+    quantum_task();
+
+    rgblight_task();
+    led_matrix_task();
+    rgb_matrix_task(); <-- rgb
+    backlight_task();
+
+    led_task();
+}
+```
+
+in `quantum/rgb_matrix/rgb_matrix.c`
+
+```
+void rgb_matrix_task(void) {
+    rgb_task_timers();
+
+    uint8_t effect = !rgb_matrix_config.enable ? 0 : rgb_matrix_config.mode;
+
+    switch (rgb_task_state) {
+        case STARTING:
+            rgb_task_start();
+            break;
+        case RENDERING:
+            rgb_task_render(effect);
+            if (effect) {
+                rgb_matrix_indicators();
+                rgb_matrix_indicators_advanced(&rgb_effect_params);
+            }
+            break;
+        case FLUSHING:
+            rgb_task_flush(effect);
+            break;
+        case SYNCING:
+            rgb_task_sync();
+            break;
+    }
+}
+```
+
 ## setting up vscode
 
 ### c_cpp_properties.json
